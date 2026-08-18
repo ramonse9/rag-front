@@ -1,17 +1,30 @@
 import { useState, type FormEvent, type KeyboardEvent } from "react";
+import type { RagEngine } from "../types/rag";
 
 interface QuestionFormProps {
   isLoading: boolean;
-  onAsk: (question: string) => boolean;
+  selectedEngine: RagEngine;
+  onEngineChange: (engine: RagEngine) => void;
+  onAsk: (question: string, engine: RagEngine) => boolean;
 }
 
-export function QuestionForm({ isLoading, onAsk }: QuestionFormProps) {
+const engineOptions: ReadonlyArray<{ value: RagEngine; label: string }> = [
+  { value: "native", label: "Native RAG" },
+  { value: "langchain", label: "LangChain" },
+];
+
+export function QuestionForm({
+  isLoading,
+  selectedEngine,
+  onEngineChange,
+  onAsk,
+}: QuestionFormProps) {
   const [question, setQuestion] = useState("");
   const isEmpty = question.trim().length === 0;
 
   const submit = () => {
     if (isEmpty || isLoading) return;
-    if (onAsk(question)) {
+    if (onAsk(question, selectedEngine)) {
       setQuestion("");
     }
   };
@@ -33,9 +46,31 @@ export function QuestionForm({ isLoading, onAsk }: QuestionFormProps) {
       onSubmit={handleSubmit}
       className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
     >
-      <label htmlFor="resume-question" className="text-sm font-semibold text-slate-900">
-        Ask about Ramon&apos;s resume
-      </label>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <label htmlFor="resume-question" className="text-sm font-semibold text-slate-900">
+          Ask about Ramon&apos;s resume
+        </label>
+        <fieldset disabled={isLoading}>
+          <legend className="mb-1.5 text-xs font-medium text-slate-600">RAG engine</legend>
+          <div className="inline-flex rounded-lg border border-slate-200 bg-slate-100 p-1">
+            {engineOptions.map((option) => (
+              <label key={option.value} className="cursor-pointer">
+                <input
+                  type="radio"
+                  name="rag-engine"
+                  value={option.value}
+                  checked={selectedEngine === option.value}
+                  onChange={() => onEngineChange(option.value)}
+                  className="peer sr-only"
+                />
+                <span className="block rounded-md px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors peer-checked:bg-white peer-checked:text-blue-700 peer-checked:shadow-sm peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-blue-600 peer-disabled:cursor-not-allowed peer-disabled:text-slate-400">
+                  {option.label}
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      </div>
       <textarea
         id="resume-question"
         name="question"

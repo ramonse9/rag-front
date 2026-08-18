@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { askResumeQuestion, RagApiError } from "../api/ragApi";
-import type { QuestionEntry } from "../types/rag";
+import type { QuestionEntry, RagEngine } from "../types/rag";
 
 function createEntryId(): string {
   return globalThis.crypto.randomUUID();
@@ -15,7 +15,7 @@ export function useResumeQuestions() {
     [entries],
   );
 
-  const askQuestion = useCallback((rawQuestion: string): boolean => {
+  const askQuestion = useCallback((rawQuestion: string, engine: RagEngine): boolean => {
     const question = rawQuestion.trim();
     if (!question || activeController.current) {
       return false;
@@ -28,15 +28,15 @@ export function useResumeQuestions() {
 
     setEntries((current) => [
       ...current,
-      { id: entryId, createdAt, question, status: "loading" },
+      { id: entryId, createdAt, question, engine, status: "loading" },
     ]);
 
-    void askResumeQuestion(question, controller.signal)
+    void askResumeQuestion(question, engine, controller.signal)
       .then((response) => {
         setEntries((current) =>
           current.map((entry) =>
             entry.id === entryId
-              ? { id: entryId, createdAt, question, status: "success", response }
+              ? { id: entryId, createdAt, question, engine, status: "success", response }
               : entry,
           ),
         );
@@ -55,7 +55,7 @@ export function useResumeQuestions() {
         setEntries((current) =>
           current.map((entry) =>
             entry.id === entryId
-              ? { id: entryId, createdAt, question, status: "error", message }
+              ? { id: entryId, createdAt, question, engine, status: "error", message }
               : entry,
           ),
         );

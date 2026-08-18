@@ -1,5 +1,10 @@
 import { getApiBaseUrl } from "../config/env";
-import type { RagResponse, RagSource } from "../types/rag";
+import type { RagEngine, RagResponse, RagSource } from "../types/rag";
+
+const ragEndpointByEngine: Record<RagEngine, string> = {
+  native: "/api/rag/ask",
+  langchain: "/api/rag/langchain/ask",
+};
 
 export type RagApiErrorCode =
   | "configuration"
@@ -56,6 +61,7 @@ function logDevelopmentError(context: string, error: unknown): void {
 
 export async function askResumeQuestion(
   question: string,
+  engine: RagEngine,
   signal?: AbortSignal,
 ): Promise<RagResponse> {
   const normalizedQuestion = question.trim();
@@ -78,7 +84,7 @@ export async function askResumeQuestion(
 
   let response: Response;
   try {
-    response = await fetch(`${apiBaseUrl}/api/rag/ask`, {
+    response = await fetch(`${apiBaseUrl}${ragEndpointByEngine[engine]}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ question: normalizedQuestion }),

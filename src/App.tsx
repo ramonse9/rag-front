@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { AnswerCard } from "./components/AnswerCard";
 import { AppHeader } from "./components/AppHeader";
 import { EmptyState } from "./components/EmptyState";
@@ -6,8 +7,10 @@ import { QuestionForm } from "./components/QuestionForm";
 import { SuggestedQuestions } from "./components/SuggestedQuestions";
 import { suggestedQuestions } from "./data/suggestedQuestions";
 import { useResumeQuestions } from "./hooks/useResumeQuestions";
+import type { RagEngine } from "./types/rag";
 
 function App() {
+  const [selectedEngine, setSelectedEngine] = useState<RagEngine>("native");
   const { entries, isLoading, askQuestion, clearHistory } = useResumeQuestions();
 
   return (
@@ -22,14 +25,19 @@ function App() {
           context in your question.
         </div>
 
-        <QuestionForm isLoading={isLoading} onAsk={askQuestion} />
+        <QuestionForm
+          isLoading={isLoading}
+          selectedEngine={selectedEngine}
+          onEngineChange={setSelectedEngine}
+          onAsk={askQuestion}
+        />
 
         <div className="mt-7">
           <SuggestedQuestions
             questions={suggestedQuestions}
             disabled={isLoading}
             onSelect={(question) => {
-              askQuestion(question);
+              askQuestion(question, selectedEngine);
             }}
           />
         </div>

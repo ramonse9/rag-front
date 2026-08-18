@@ -46,7 +46,12 @@ npm run build      # Type-check and create a production build
 
 ## Backend API contract
 
-The application calls `POST /api/rag/ask` relative to `VITE_API_BASE_URL`.
+The application calls one of two endpoints relative to `VITE_API_BASE_URL`, based on the selected RAG engine:
+
+- Native RAG: `POST /api/rag/ask`
+- LangChain: `POST /api/rag/langchain/ask`
+
+Both endpoints use the same request and response contract.
 
 Request:
 

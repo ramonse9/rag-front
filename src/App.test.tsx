@@ -93,6 +93,51 @@ describe("AI Resume application", () => {
     expect(screen.getByRole("heading", { name: QUESTION })).toBeInTheDocument();
   });
 
+  it("uses Native RAG by default and routes LangChain requests to its endpoint", async () => {
+    const user = userEvent.setup();
+    fetchMock.mockResolvedValue(jsonResponse(successResponse));
+    render(<App />);
+
+    const nativeEngine = screen.getByRole("radio", { name: "Native RAG" });
+    const langChainEngine = screen.getByRole("radio", { name: "LangChain" });
+    expect(nativeEngine).toBeChecked();
+
+    await user.click(langChainEngine);
+    expect(langChainEngine).toBeChecked();
+    await user.click(screen.getByRole("button", { name: QUESTION }));
+
+    await screen.findByText("Engine: LangChain");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:3000/api/rag/langchain/ask",
+      expect.objectContaining({ method: "POST" }),
+    );
+  });
+
+  it("preserves the engine used by each completed answer", async () => {
+    const user = userEvent.setup();
+    const secondQuestion = "What AI technologies has Ramon worked with?";
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse(successResponse))
+      .mockResolvedValueOnce(
+        jsonResponse({ ...successResponse, question: secondQuestion, answer: "AI experience" }),
+      );
+    render(<App />);
+
+    await user.click(screen.getByRole("button", { name: QUESTION }));
+    await screen.findByText("Engine: Native RAG");
+
+    await user.click(screen.getByRole("radio", { name: "LangChain" }));
+    await user.click(screen.getByRole("button", { name: secondQuestion }));
+    await screen.findByText("Engine: LangChain");
+
+    expect(screen.getByText("Engine: Native RAG")).toBeInTheDocument();
+    expect(screen.getByText("Engine: LangChain")).toBeInTheDocument();
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      "http://localhost:3000/api/rag/ask",
+      "http://localhost:3000/api/rag/langchain/ask",
+    ]);
+  });
+
   it("shows the RAG loading state and disables submission controls", async () => {
     const user = userEvent.setup();
     const pending = deferredResponse();

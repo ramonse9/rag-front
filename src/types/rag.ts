@@ -11,10 +11,13 @@ export interface RagResponse {
   sources: RagSource[];
 }
 
+export type RagEngine = "native" | "langchain";
+
 interface QuestionEntryBase {
   id: string;
   createdAt: number;
   question: string;
+  engine: RagEngine;
 }
 
 export type QuestionEntry =

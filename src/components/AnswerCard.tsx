@@ -25,9 +25,14 @@ export function AnswerCard({ entry }: AnswerCardProps) {
         </div>
       ) : (
         <div className="mt-5 border-t border-slate-100 pt-5">
-          <p className="mb-3 text-xs font-semibold tracking-wide text-blue-700 uppercase">
-            Answer
-          </p>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs font-semibold tracking-wide text-blue-700 uppercase">
+              Answer
+            </p>
+            <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600">
+              Engine: {entry.engine === "native" ? "Native RAG" : "LangChain"}
+            </span>
+          </div>
           <AnswerMarkdown>{entry.response.answer}</AnswerMarkdown>
           <SourcesDisclosure sources={entry.response.sources} />
         </div>
