@@ -93,6 +93,21 @@ describe("AI Resume application", () => {
     expect(screen.getByRole("heading", { name: QUESTION })).toBeInTheDocument();
   });
 
+  it("shows the artificial intelligence suggested question", () => {
+    render(<App />);
+
+    expect(
+      screen.getByRole("button", {
+        name: "What experience does Ramon have with artificial intelligence?",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", {
+        name: "What leadership experience does Ramon have?",
+      }),
+    ).not.toBeInTheDocument();
+  });
+
   it("uses Native RAG by default and routes LangChain requests to its endpoint", async () => {
     const user = userEvent.setup();
     fetchMock.mockResolvedValue(jsonResponse(successResponse));

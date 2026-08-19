@@ -4,5 +4,5 @@ export const suggestedQuestions = [
   "How many years of professional software development experience does Ramon have?",
   "What experience does Ramon have designing SaaS architectures?",
   "What AI technologies has Ramon worked with?",
-  "What leadership experience does Ramon have?",
+  "What experience does Ramon have with artificial intelligence?",
 ] as const;
